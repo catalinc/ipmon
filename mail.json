@@ -1,0 +1,9 @@
+{
+  "from": "user@example.net",
+  "password": "secret",
+  "recipients": [
+    "someone@example.net"
+  ],
+  "hostname": "mx.example.net",
+  "port": 25
+}
