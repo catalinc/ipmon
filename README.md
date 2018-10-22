@@ -7,7 +7,7 @@ When changes are detected (i.e. a new IP address) the utility will send an email
 # Installation
 
 1. Install the CLI utility with `go install github.com/catalinc/ipmon`
-2. Edit mail configuration according to your setup. Use the `mail.json` file as template.
+2. Edit mailer configuration according to your setup. You can use the `mail.json` file as template.
 3. Run the utility:
 ```bash
 ipmon -help # to view options OR
@@ -20,4 +20,5 @@ ipmon -interval <networkCheckIntervalInSeconds> \
 # Warning
 
 The utility requires the SMTP password to be stored in clear in `mail.json` configuration file.
+
 So, consider yourself warned ;-).
