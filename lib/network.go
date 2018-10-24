@@ -16,7 +16,7 @@ type NetConfig struct {
 // String returns the string representation of the network configuration
 func (n *NetConfig) String() string {
 	sb := strings.Builder{}
-	sb.WriteString("Hostname: ")
+	sb.WriteString("ServerHost: ")
 	sb.WriteString(n.Hostname)
 	sb.WriteString("\nIPs:\n")
 	sb.WriteString(strings.Join(n.IPs, "\n"))

@@ -67,14 +67,15 @@ func TestNewMailerConfig(t *testing.T) {
 	if err != nil {
 		t.Errorf("Unable to load mailer configuration from file: %v", err)
 	}
-	expectedCfg := lib.MailConfig{
-		From:       "user@example.net",
-		Password:   "secret",
-		Recipients: []string{"someone@example.net"},
-		Hostname:   "mx.example.net",
-		Port:       25,
+	expectedCfg := &lib.MailConfig{
+		From:           "user@example.net",
+		To:             "someone@example.net",
+		ServerHost:     "mx.example.net",
+		ServerPort:     25,
+		ServerUser:     "user@example.net",
+		ServerPassword: "secret",
 	}
-	if !reflect.DeepEqual(*cfg, expectedCfg) {
+	if !reflect.DeepEqual(cfg, expectedCfg) {
 		t.Errorf("Expected %v got %v", expectedCfg, cfg)
 	}
 }

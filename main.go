@@ -66,7 +66,7 @@ func run() error {
 			return err
 		}
 		// TODO compute a nice diff between configurations and send only the changes
-		err = lib.SendMail(mc, crtConf.String())
+		err = lib.SendMailSSL(mc, "Network configuration changed on "+crtConf.Hostname, crtConf.String())
 		if err != nil {
 			return err
 		}
