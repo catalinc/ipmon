@@ -13,3 +13,6 @@
 
 # IntelliJ Idea
 .idea/
+
+# VS Code
+.vscode/
