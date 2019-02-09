@@ -8,8 +8,8 @@ import (
 	"testing"
 )
 
-func TestNewNetConfig(t *testing.T) {
-	n, err := lib.NewNetConfig()
+func TestGetCurrentNetConfig(t *testing.T) {
+	n, err := lib.GetCurrentNetConfig()
 	if err != nil {
 		t.Errorf("Unable to read current network configuration: %v", err)
 	}
@@ -21,7 +21,7 @@ func TestNewNetConfig(t *testing.T) {
 	}
 }
 
-func TestNetConfigSaveAndLoad(t *testing.T) {
+func TestSaveLoadNetConfig(t *testing.T) {
 	tmpFile, err := createTempFile()
 	if err != nil {
 		t.Errorf("Unable to create temporary file: %v", err)
@@ -34,7 +34,7 @@ func TestNetConfigSaveAndLoad(t *testing.T) {
 		t.Errorf("Unable to save network configuration: %v", err)
 	}
 
-	saved, err := lib.NewNetConfigFromFile(tmpFile)
+	saved, err := lib.LoadNetConfig(tmpFile)
 	if err != nil {
 		t.Errorf("Unable to read saved network configuration: %v", err)
 	}
@@ -62,8 +62,8 @@ func TestNetConfigIsChanged(t *testing.T) {
 	}
 }
 
-func TestNewMailerConfig(t *testing.T) {
-	cfg, err := lib.NewMailConfig("mail.json")
+func TestLoadMailConfig(t *testing.T) {
+	cfg, err := lib.LoadMailConfig("mail.json")
 	if err != nil {
 		t.Errorf("Unable to load mailer configuration from file: %v", err)
 	}
@@ -77,6 +77,16 @@ func TestNewMailerConfig(t *testing.T) {
 	}
 	if !reflect.DeepEqual(cfg, expectedCfg) {
 		t.Errorf("Expected %v got %v", expectedCfg, cfg)
+	}
+}
+
+func TestDiffs(t *testing.T) {
+	n1 := &lib.NetConfig{Hostname: "spiderman", IPs: []string{"127.0.0.1", "192.168.0.17"}}
+	n2 := &lib.NetConfig{Hostname: "batman", IPs: []string{"127.0.0.1", "192.168.0.18", "10.0.0.1"}}
+	diffs := n1.Diffs(n2)
+	expectedDiffs := "Hostname changed: batman -> spiderman\nIP count changed: 3 -> 2\nNew IP: 192.168.0.17\n"
+	if diffs != expectedDiffs {
+		t.Errorf("Expected %v got %v", expectedDiffs, diffs)
 	}
 }
 

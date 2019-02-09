@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -16,15 +17,15 @@ type NetConfig struct {
 // String returns the string representation of the network configuration
 func (n *NetConfig) String() string {
 	sb := strings.Builder{}
-	sb.WriteString("ServerHost: ")
+	sb.WriteString("Hostname: ")
 	sb.WriteString(n.Hostname)
 	sb.WriteString("\nIPs:\n")
 	sb.WriteString(strings.Join(n.IPs, "\n"))
 	return sb.String()
 }
 
-// NewNetConfig creates a new configuration initialized from current network settings
-func NewNetConfig() (*NetConfig, error) {
+// GetCurrentNetConfig reads current network settings
+func GetCurrentNetConfig() (*NetConfig, error) {
 	n := &NetConfig{}
 	hostname, err := os.Hostname()
 	if err != nil {
@@ -41,8 +42,8 @@ func NewNetConfig() (*NetConfig, error) {
 	return n, nil
 }
 
-// NewNetConfigFromFile loads the configuration from given file
-func NewNetConfigFromFile(path string) (*NetConfig, error) {
+// LoadNetConfig loads network settings from file
+func LoadNetConfig(path string) (*NetConfig, error) {
 	n := &NetConfig{}
 	err := n.Load(path)
 	return n, err
@@ -53,7 +54,7 @@ func (n *NetConfig) IPCount() int {
 	return len(n.IPs)
 }
 
-// Load the hostname and the IP list from given file
+// Load hostname and IP list from file
 func (n *NetConfig) Load(path string) error {
 	file, err := os.Open(path)
 	defer file.Close()
@@ -64,7 +65,7 @@ func (n *NetConfig) Load(path string) error {
 	return dec.Decode(n)
 }
 
-// Save the hostname and the IP list to the given file
+// Save hostname and IP list to file
 func (n *NetConfig) Save(path string) error {
 	file, err := os.Create(path)
 	defer file.Close()
@@ -89,6 +90,33 @@ func (n *NetConfig) IsChanged(other *NetConfig) bool {
 		}
 	}
 	return false
+}
+
+// Diffs compute a report with the differences between two configurations
+func (n *NetConfig) Diffs(other *NetConfig) string {
+	sb := strings.Builder{}
+	if n.Hostname != other.Hostname {
+		sb.WriteString("Hostname changed: ")
+		sb.WriteString(other.Hostname)
+		sb.WriteString(" -> ")
+		sb.WriteString(n.Hostname)
+		sb.WriteString("\n")
+	}
+	if n.IPCount() != other.IPCount() {
+		sb.WriteString("IP count changed: ")
+		sb.WriteString(strconv.Itoa(other.IPCount()))
+		sb.WriteString(" -> ")
+		sb.WriteString(strconv.Itoa(n.IPCount()))
+		sb.WriteString("\n")
+	}
+	for _, ip := range n.IPs {
+		if !contains(other.IPs, ip) {
+			sb.WriteString("New IP: ")
+			sb.WriteString(ip)
+			sb.WriteString("\n")
+		}
+	}
+	return sb.String()
 }
 
 func contains(lines []string, s string) bool {

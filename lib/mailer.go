@@ -11,7 +11,7 @@ import (
 	"strconv"
 )
 
-// MailConfig represents the static configuration for mailer
+// MailConfig represents SMTP server details
 type MailConfig struct {
 	From           string `json:"from"`
 	To             string `json:"to"`
@@ -21,8 +21,8 @@ type MailConfig struct {
 	ServerPassword string `json:"serverPassword"`
 }
 
-// NewMailConfig creates mail configuration from file
-func NewMailConfig(path string) (*MailConfig, error) {
+// LoadMailConfig reads mail configuration from file
+func LoadMailConfig(path string) (*MailConfig, error) {
 	m := &MailConfig{}
 	file, err := os.Open(path)
 	defer file.Close()
@@ -34,7 +34,8 @@ func NewMailConfig(path string) (*MailConfig, error) {
 	return m, err
 }
 
-// SendMail sends the given text according to configuration
+// SendMailSSL sends a mail message using SMTP servers
+// that require a SSL connection from the very beginning.
 func SendMailSSL(cfg *MailConfig, subject string, body string) error {
 	from := mail.Address{Address: cfg.From}
 	to := mail.Address{Address: cfg.To}

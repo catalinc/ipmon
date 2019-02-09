@@ -23,7 +23,7 @@ var (
 )
 
 func init() {
-	flag.UintVar(&interval, "interval", defaultInterval, "interval between checks in seconds")
+	flag.UintVar(&interval, "interval", defaultInterval, "interval between checks (in seconds)")
 	flag.BoolVar(&runOnce, "runOnce", false, "run once and stop")
 	flag.StringVar(&netConf, "netConf", defaultNetConf, "network configuration file")
 	flag.StringVar(&mailConf, "mailConf", defaultMailConf, "mail configuration file")
@@ -33,50 +33,43 @@ func init() {
 func run() error {
 	log.Println("Checking network configuration...")
 
-	crtConf, err := lib.NewNetConfig()
+	crtConf, err := lib.GetCurrentNetConfig()
 	if err != nil {
 		return err
 	}
 
-	confChanged := false
-
-	if exists(defaultNetConf) {
+	if exists(netConf) {
 		log.Println("Found previous configuration")
 
-		prevConf, err := lib.NewNetConfigFromFile(netConf)
+		prevConf, err := lib.LoadNetConfig(netConf)
 		if err != nil {
 			return err
 		}
 
 		if crtConf.IsChanged(prevConf) {
 			log.Println("Network configuration changed")
-			confChanged = true
+			log.Println("Sending mail...")
+			mc, err := lib.LoadMailConfig(mailConf)
+			if err != nil {
+				return err
+			}
+			diffs := crtConf.Diffs(prevConf)
+			err = lib.SendMailSSL(mc, "Network configuration changed on "+crtConf.Hostname, diffs)
+			if err != nil {
+				return err
+			}
 		} else {
 			log.Println("No changes detected")
 		}
 	} else {
 		log.Println("Previous configuration not found")
-		confChanged = true
 	}
 
-	if confChanged {
-		log.Println("Sending mail...")
-		mc, err := lib.NewMailConfig(mailConf)
-		if err != nil {
-			return err
-		}
-		// TODO compute a nice diff between configurations and send only the changes
-		err = lib.SendMailSSL(mc, "Network configuration changed on "+crtConf.Hostname, crtConf.String())
-		if err != nil {
-			return err
-		}
-
-		err = crtConf.Save(netConf)
-		if err != nil {
-			return err
-		}
-		log.Println("Current configuration saved")
+	err = crtConf.Save(netConf)
+	if err != nil {
+		return err
 	}
+	log.Println("Current configuration saved")
 
 	return nil
 }
