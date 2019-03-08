@@ -8,8 +8,8 @@ import (
 	"testing"
 )
 
-func TestGetCurrentNetConfig(t *testing.T) {
-	n, err := lib.GetCurrentNetConfig()
+func TestGetNetConfig(t *testing.T) {
+	n, err := lib.GetNetConfig()
 	if err != nil {
 		t.Errorf("Unable to read current network configuration: %v", err)
 	}
@@ -80,13 +80,46 @@ func TestLoadMailConfig(t *testing.T) {
 	}
 }
 
+func TestContains(t *testing.T) {
+	strings := []string{"aa", "bb", "cc"}
+	in := "aa"
+	out := "dd"
+	if !lib.Contains(strings, in) {
+		t.Errorf("%v should contain %v", strings, in)
+	}
+	if lib.Contains(strings, "dd") {
+		t.Errorf("%v should not contain %v", strings, out)
+	}
+}
+
 func TestDiffs(t *testing.T) {
-	n1 := &lib.NetConfig{Hostname: "spiderman", IPs: []string{"127.0.0.1", "192.168.0.17"}}
-	n2 := &lib.NetConfig{Hostname: "batman", IPs: []string{"127.0.0.1", "192.168.0.18", "10.0.0.1"}}
-	diffs := n1.Diffs(n2)
+	crtConf := &lib.NetConfig{Hostname: "spiderman", IPs: []string{"127.0.0.1", "192.168.0.17"}}
+	prevConf := &lib.NetConfig{Hostname: "batman", IPs: []string{"127.0.0.1", "192.168.0.18", "10.0.0.1"}}
+
+	diffs := lib.Diffs(crtConf, prevConf)
 	expectedDiffs := "Hostname changed: batman -> spiderman\nIP count changed: 3 -> 2\nNew IP: 192.168.0.17\n"
 	if diffs != expectedDiffs {
 		t.Errorf("Expected %v got %v", expectedDiffs, diffs)
+	}
+}
+
+func TestReport(t *testing.T) {
+	crtConf := &lib.NetConfig{Hostname: "spiderman", IPs: []string{"127.0.0.1", "192.168.0.17"}}
+	prevConf := &lib.NetConfig{Hostname: "batman", IPs: []string{"127.0.0.1", "192.168.0.18", "10.0.0.1"}}
+
+	report := lib.Report(crtConf, prevConf)
+	expectedReport := "Changes summary:\n" +
+		"Hostname changed: batman -> spiderman\n" +
+		"IP count changed: 3 -> 2\nNew IP: 192.168.0.17\n\n" +
+		"Current configuration:\n" + crtConf.String()
+	if report != expectedReport {
+		t.Errorf("Expected %v got %v", expectedReport, report)
+	}
+
+	report = lib.Report(crtConf, nil)
+	expectedReport = "Current configuration:\n" + crtConf.String()
+	if report != expectedReport {
+		t.Errorf("Expected %v got %v", expectedReport, report)
 	}
 }
 

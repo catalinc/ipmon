@@ -33,7 +33,7 @@ func init() {
 func run() error {
 	log.Println("Checking network configuration...")
 
-	crtConf, err := lib.GetCurrentNetConfig()
+	crtConf, err := lib.GetNetConfig()
 	if err != nil {
 		return err
 	}
@@ -53,7 +53,7 @@ func run() error {
 			if err != nil {
 				return err
 			}
-			diffs := crtConf.Diffs(prevConf)
+			diffs := lib.Report(crtConf, prevConf)
 			err = lib.SendMailSSL(mc, "Network configuration changed on "+crtConf.Hostname, diffs)
 			if err != nil {
 				return err

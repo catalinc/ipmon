@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net"
 	"os"
-	"strconv"
 	"strings"
 )
 
@@ -24,8 +23,8 @@ func (n *NetConfig) String() string {
 	return sb.String()
 }
 
-// GetCurrentNetConfig reads current network settings
-func GetCurrentNetConfig() (*NetConfig, error) {
+// GetNetConfig reads current network settings
+func GetNetConfig() (*NetConfig, error) {
 	n := &NetConfig{}
 	hostname, err := os.Hostname()
 	if err != nil {
@@ -85,43 +84,7 @@ func (n *NetConfig) IsChanged(other *NetConfig) bool {
 		return true
 	}
 	for _, ip := range n.IPs {
-		if !contains(other.IPs, ip) {
-			return true
-		}
-	}
-	return false
-}
-
-// Diffs compute a report with the differences between two configurations
-func (n *NetConfig) Diffs(other *NetConfig) string {
-	sb := strings.Builder{}
-	if n.Hostname != other.Hostname {
-		sb.WriteString("Hostname changed: ")
-		sb.WriteString(other.Hostname)
-		sb.WriteString(" -> ")
-		sb.WriteString(n.Hostname)
-		sb.WriteString("\n")
-	}
-	if n.IPCount() != other.IPCount() {
-		sb.WriteString("IP count changed: ")
-		sb.WriteString(strconv.Itoa(other.IPCount()))
-		sb.WriteString(" -> ")
-		sb.WriteString(strconv.Itoa(n.IPCount()))
-		sb.WriteString("\n")
-	}
-	for _, ip := range n.IPs {
-		if !contains(other.IPs, ip) {
-			sb.WriteString("New IP: ")
-			sb.WriteString(ip)
-			sb.WriteString("\n")
-		}
-	}
-	return sb.String()
-}
-
-func contains(lines []string, s string) bool {
-	for _, line := range lines {
-		if line == s {
+		if !Contains(other.IPs, ip) {
 			return true
 		}
 	}
