@@ -30,6 +30,7 @@ func init() {
 }
 
 // run implements the network configuration check
+// TODO test
 func run() error {
 	log.Println("Checking network configuration...")
 
@@ -40,12 +41,10 @@ func run() error {
 
 	if exists(netConf) {
 		log.Println("Found previous configuration")
-
 		prevConf, err := lib.LoadNetConfig(netConf)
 		if err != nil {
 			return err
 		}
-
 		if crtConf.IsChanged(prevConf) {
 			log.Println("Network configuration changed")
 			log.Println("Sending mail...")
@@ -53,8 +52,8 @@ func run() error {
 			if err != nil {
 				return err
 			}
-			diffs := lib.Report(crtConf, prevConf)
-			err = lib.SendMailSSL(mc, "Network configuration changed on "+crtConf.Hostname, diffs)
+			report := lib.Report(crtConf, prevConf)
+			err = lib.SendMailSSL(mc, "Network configuration changed on "+crtConf.Hostname, report)
 			if err != nil {
 				return err
 			}
@@ -63,6 +62,16 @@ func run() error {
 		}
 	} else {
 		log.Println("Previous configuration not found")
+		log.Println("Sending mail with current configuration...")
+		mc, err := lib.LoadMailConfig(mailConf)
+		if err != nil {
+			return err
+		}
+		report := lib.Report(crtConf, nil)
+		err = lib.SendMailSSL(mc, "Network configuration on "+crtConf.Hostname, report)
+		if err != nil {
+			return err
+		}
 	}
 
 	err = crtConf.Save(netConf)
