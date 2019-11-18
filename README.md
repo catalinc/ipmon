@@ -24,7 +24,7 @@ ipmon -interval <networkCheckIntervalInSeconds> \
 
 The utility checks network configuration for changes at regular intervals.
 
-When changes are detected (i.e. a new IP address) the utility will send an email alert to a preconfigured list of recipients.
+When changes are detected (i.e. a new IP address) the utility sends an email alert to a preconfigured list of recipients.
 
 # Warning
 
